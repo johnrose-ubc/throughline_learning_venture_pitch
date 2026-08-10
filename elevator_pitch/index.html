@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Throughline Learning — 60-Second Pitch</title>
+<meta name="description" content="Throughline Learning: a narrated 60-second elevator pitch. Continuous support for neurodivergent students from high school to career.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   THROUGHLINE LEARNING — 60-second narrated pitch
+   Single self-contained file. Drop into a GitHub Pages repo alongside your
+   audio file. Everything you need to change lives in the CONFIG and TIMINGS
+   blocks in the script section at the bottom.
+   ========================================================================== */
+
+:root{
+  --ink:#0C121C;
+  --ink-2:#131C2A;
+  --paper:#F4F1EA;
+  --paper-dim:rgba(244,241,234,.58);
+  --paper-faint:rgba(244,241,234,.26);
+  --gold:#E8B14C;
+  --gold-soft:rgba(232,177,76,.16);
+  --teal:#5FC7B8;
+  --alert:#E2685C;
+  --rule:rgba(244,241,234,.14);
+  --serif:'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --sans:'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--ink); color:var(--paper);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+
+/* ---------- Layout shell ---------------------------------------------- */
+#app{
+  position:fixed; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:clamp(10px,2vh,22px); padding:clamp(10px,2.5vh,28px);
+}
+#stageWrap{
+  position:relative; width:100%; flex:1 1 auto;
+  display:flex; align-items:center; justify-content:center; min-height:0;
+}
+/* Fixed 1280x720 coordinate space, scaled to fit. Guarantees identical
+   layout on every device, which is what you want for a deck. */
+#stage{
+  position:relative; width:1280px; height:720px; flex:none;
+  transform-origin:center center;
+  background:radial-gradient(120% 130% at 50% 0%, var(--ink-2) 0%, var(--ink) 62%);
+  border-radius:14px; overflow:hidden;
+  box-shadow:0 30px 90px -30px rgba(0,0,0,.9), 0 0 0 1px var(--rule);
+}
+
+/* ---------- The throughline: a single continuous line through the deck -- */
+#throughline{
+  position:absolute; left:0; right:0; bottom:0; height:3px;
+  background:var(--rule); z-index:40;
+}
+#throughlineFill{
+  position:absolute; left:0; top:0; bottom:0; width:0%;
+  background:linear-gradient(90deg, var(--teal), var(--gold));
+}
+
+/* ---------- Slides ------------------------------------------------------ */
+.slide{
+  position:absolute; inset:0;
+  /* Bottom padding reserves the caption band so text can never collide with it. */
+  padding:78px 96px 156px;
+  display:flex; flex-direction:column; justify-content:center;
+  opacity:0; visibility:hidden; transition:opacity .55s ease;
+}
+.slide.active{opacity:1; visibility:visible}
+
+.eyebrow{
+  font-size:15px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--paper-faint); font-weight:600; margin-bottom:28px;
+}
+
+.display{
+  font-family:var(--serif); font-weight:400; line-height:1.06;
+  letter-spacing:-.015em; font-size:104px; margin:0;
+}
+.display--sm{font-size:76px}
+
+/* Reveal machinery. Elements animate in on slide activation, staggered by
+   --d (seconds). If the viewer scrubs into the middle of a slide, .no-anim
+   is applied and everything appears instantly. */
+.rv{opacity:0; transform:translateY(14px)}
+.slide.active .rv{
+  animation:rvIn .62s cubic-bezier(.22,.8,.3,1) forwards;
+  animation-delay:var(--d,0s);
+}
+.slide.active.no-anim .rv{animation:none; opacity:1; transform:none}
+@keyframes rvIn{to{opacity:1; transform:none}}
+
+/* ---------- S1: the claim ---------------------------------------------- */
+#s1 .display{font-size:84px; max-width:none}
+#s1 .sub{
+  margin-top:40px; font-size:21px; color:var(--paper-dim); letter-spacing:.01em;
+}
+
+/* ---------- S2/S3: the inventory ---------------------------------------- */
+.inventory{display:grid; grid-template-columns:repeat(4,1fr); gap:22px; margin-top:56px}
+.inv-card{
+  border:1px solid var(--rule); border-radius:12px; padding:30px 24px 26px;
+  background:rgba(244,241,234,.03); position:relative; overflow:hidden;
+  transition:opacity .6s ease, filter .6s ease, border-color .6s ease;
+}
+.inv-card .tick{
+  width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
+  background:var(--gold-soft); color:var(--gold); font-size:14px; margin-bottom:18px;
+}
+.inv-card .lbl{
+  font-size:16px; font-weight:600; letter-spacing:.13em; text-transform:uppercase;
+}
+.inv-card .note{margin-top:9px; font-size:14px; color:var(--paper-faint); letter-spacing:.01em}
+.inv-card.dim{opacity:.34; filter:saturate(.2)}
+
+.gap-card{
+  border:1px dashed var(--alert); border-radius:12px; padding:30px 24px 26px;
+  background:rgba(226,104,92,.07); display:flex; flex-direction:column; justify-content:center;
+}
+.gap-card .lbl{font-size:16px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--alert)}
+.gap-card .big{font-family:var(--serif); font-size:38px; line-height:1.1; margin-top:10px}
+/* Slide 3 fits five columns instead of four, so the cards tighten up. */
+#s3 .inv-card{padding:24px 16px 22px}
+#s3 .inv-card .lbl{font-size:13px; letter-spacing:.07em}
+#s3 .inv-card .note{font-size:12.5px}
+#s3 .gap-card{padding:24px 18px}
+#s3 .gap-card .lbl{font-size:13px; letter-spacing:.07em}
+#s3 .gap-card .big{font-size:31px}
+
+/* ---------- S4: the pressure -------------------------------------------- */
+.pressure{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; margin-top:36px}
+.statline{font-family:var(--serif); font-size:112px; line-height:1; letter-spacing:-.02em}
+.statline .unit{font-family:var(--sans); font-size:26px; font-weight:600; letter-spacing:.02em; color:var(--gold)}
+.statcap{margin-top:14px; font-size:19px; color:var(--paper-dim); max-width:26ch; line-height:1.45}
+.arrows{display:flex; gap:34px; margin-top:44px}
+.arrow-item{display:flex; align-items:baseline; gap:10px; font-size:19px; font-weight:600}
+.arrow-item .glyph{font-size:26px}
+.up{color:var(--teal)} .down{color:var(--alert)}
+.chart-frame{border:1px solid var(--rule); border-radius:12px; padding:22px 24px 16px; background:rgba(244,241,234,.03)}
+.chart-title{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--paper-faint); margin-bottom:12px}
+.spark{stroke-dasharray:640; stroke-dashoffset:640}
+.slide.active .spark{animation:draw 1.5s ease forwards; animation-delay:var(--d,0s)}
+.slide.active.no-anim .spark{animation:none; stroke-dashoffset:0}
+@keyframes draw{to{stroke-dashoffset:0}}
+.chart-key{display:flex; gap:22px; margin-top:12px; font-size:13px; color:var(--paper-dim)}
+.chart-key i{display:inline-block; width:16px; height:2px; margin-right:7px; vertical-align:middle}
+
+/* ---------- S5: the eight barriers -------------------------------------- */
+.gates{position:relative; margin-top:48px; padding-top:8px}
+.gates-rail{position:absolute; left:0; right:0; top:26px; height:2px; background:var(--rule)}
+.gates-row{position:relative; display:grid; grid-template-columns:repeat(8,1fr); gap:10px}
+.gate{display:flex; flex-direction:column; align-items:center; text-align:center}
+.gate .dot{
+  width:54px; height:54px; border-radius:50%; display:grid; place-items:center;
+  background:var(--ink-2); border:2px solid var(--teal); color:var(--paper);
+  font-size:19px; font-weight:700; font-variant-numeric:tabular-nums;
+  transition:border-color .5s ease, background .5s ease, color .5s ease, box-shadow .5s ease;
+}
+.gate .name{margin-top:16px; font-size:14.5px; font-weight:600; letter-spacing:.02em; line-height:1.3}
+.gate.broken .dot{
+  border-color:var(--alert); background:rgba(226,104,92,.18); color:var(--alert);
+  box-shadow:0 0 0 7px rgba(226,104,92,.12);
+}
+.gate.broken .name{color:var(--alert)}
+.gate.downstream{opacity:.3}
+.gates-caption{
+  margin-top:40px; font-family:var(--serif); font-size:33px; line-height:1.25; max-width:38ch;
+}
+
+/* ---------- S6: the team ------------------------------------------------ */
+.team{display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-top:48px}
+.person{
+  border:1px solid var(--rule); border-left:3px solid var(--gold); border-radius:12px;
+  padding:36px 34px; background:rgba(244,241,234,.03);
+}
+.person .nm{font-family:var(--serif); font-size:50px; line-height:1.05; margin-bottom:16px}
+.person .rl{font-size:16px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin-bottom:14px}
+.person .cr{font-size:18px; line-height:1.5; color:var(--paper-dim)}
+
+/* ---------- S7: proof of life ------------------------------------------- */
+.factrow{display:grid; grid-template-columns:repeat(3,1fr); gap:30px; margin-top:58px}
+.fact{border-top:2px solid var(--gold); padding-top:20px}
+.fact .fnum{font-family:var(--serif); font-size:62px; line-height:1; letter-spacing:-.02em}
+.fact .flbl{margin-top:10px; font-size:18px; color:var(--paper-dim); line-height:1.4}
+.badge{
+  display:inline-flex; align-items:center; gap:11px; padding:11px 20px; border-radius:999px;
+  border:1px solid var(--teal); color:var(--teal); font-size:17px; font-weight:600; letter-spacing:.02em;
+}
+.badge .pip{width:9px; height:9px; border-radius:50%; background:var(--teal)}
+
+/* ---------- S8: the ask -------------------------------------------------- */
+.ask-num{font-family:var(--serif); font-size:188px; line-height:.92; letter-spacing:-.03em; margin-top:8px}
+.ask-split{display:grid; grid-template-columns:1fr 1fr; gap:26px; margin-top:48px; max-width:840px}
+.ask-item{border-top:2px solid var(--gold); padding-top:20px}
+.ask-item .amt{font-family:var(--serif); font-size:48px; line-height:1}
+.ask-item .what{margin-top:10px; font-size:18px; color:var(--paper-dim); line-height:1.45}
+
+/* ---------- S9: close ---------------------------------------------------- */
+#s9{align-items:center; text-align:center}
+.wordmark{font-family:var(--serif); font-size:88px; letter-spacing:.01em; line-height:1}
+.tagline{margin-top:20px; font-size:25px; color:var(--paper-dim); font-style:italic; font-family:var(--serif)}
+.cta{
+  display:inline-flex; align-items:center; gap:12px; margin-top:52px;
+  padding:19px 38px; border-radius:999px; background:var(--gold); color:var(--ink);
+  font-size:19px; font-weight:700; text-decoration:none; letter-spacing:.01em;
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.cta:hover{transform:translateY(-2px); box-shadow:0 14px 34px -12px rgba(232,177,76,.7)}
+.cta.is-placeholder{background:transparent; color:var(--gold); border:1px dashed var(--gold)}
+
+/* ---------- Poster / title card ------------------------------------------ */
+#poster{
+  position:absolute; inset:0; z-index:60; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; gap:22px;
+  background:radial-gradient(120% 130% at 50% 0%, var(--ink-2) 0%, var(--ink) 62%);
+  transition:opacity .5s ease, visibility .5s ease;
+}
+#poster.hidden{opacity:0; visibility:hidden; pointer-events:none}
+#poster .wordmark{font-size:96px}
+#poster .tagline{margin-top:6px}
+#playBtn{
+  margin-top:30px; display:inline-flex; align-items:center; gap:15px;
+  padding:20px 44px; border-radius:999px; border:0; cursor:pointer;
+  background:var(--gold); color:var(--ink); font-family:var(--sans);
+  font-size:20px; font-weight:700; letter-spacing:.01em;
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+#playBtn:hover{transform:translateY(-2px); box-shadow:0 16px 40px -14px rgba(232,177,76,.75)}
+#poster .meta{margin-top:26px; font-size:15px; color:var(--paper-faint); letter-spacing:.06em}
+
+/* ---------- Captions ------------------------------------------------------ */
+#captionBar{
+  position:absolute; left:0; right:0; bottom:34px; z-index:45;
+  display:flex; justify-content:center; padding:0 90px; pointer-events:none;
+}
+#captionBar.off{display:none}
+#captionText{
+  background:rgba(12,18,28,.86); border:1px solid var(--rule); backdrop-filter:blur(6px);
+  padding:12px 22px; border-radius:9px; font-size:18px; line-height:1.45;
+  max-width:1020px; text-align:center; color:var(--paper);
+}
+#captionText:empty{display:none}
+
+/* ---------- Controls ------------------------------------------------------ */
+#controls{
+  flex:none; width:min(1280px,100%); display:flex; align-items:center; gap:16px;
+  font-size:14px; color:var(--paper-dim);
+}
+#controls button{
+  background:transparent; border:1px solid var(--rule); color:var(--paper);
+  border-radius:8px; padding:9px 14px; font-family:var(--sans); font-size:13.5px;
+  font-weight:600; cursor:pointer; transition:border-color .15s, background .15s;
+  white-space:nowrap;
+}
+#controls button:hover{border-color:var(--gold); background:rgba(232,177,76,.08)}
+#controls button[aria-pressed="true"]{border-color:var(--teal); color:var(--teal)}
+#scrub{
+  flex:1 1 auto; -webkit-appearance:none; appearance:none; height:5px; border-radius:999px;
+  background:var(--rule); cursor:pointer; min-width:80px;
+}
+#scrub::-webkit-slider-thumb{
+  -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+  background:var(--gold); cursor:pointer; border:0;
+}
+#scrub::-moz-range-thumb{width:15px; height:15px; border-radius:50%; background:var(--gold); border:0; cursor:pointer}
+#time{font-variant-numeric:tabular-nums; letter-spacing:.04em; white-space:nowrap}
+#slideCount{font-variant-numeric:tabular-nums; letter-spacing:.08em; white-space:nowrap; color:var(--paper-faint)}
+
+/* ---------- Notices -------------------------------------------------------- */
+#notice{
+  position:fixed; left:14px; bottom:14px; z-index:90; max-width:340px;
+  background:rgba(19,28,42,.96); border:1px solid var(--rule); border-left:3px solid var(--gold);
+  border-radius:9px; padding:13px 16px; font-size:13px; line-height:1.55; color:var(--paper-dim);
+}
+#notice.hidden{display:none}
+#notice .mono{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; word-break:break-all; color:var(--gold)}
+#notice b{color:var(--paper)}
+
+/* ---------- Tuning mode (?tune=1) ------------------------------------------ */
+#tuner{
+  position:fixed; right:14px; top:14px; z-index:95; width:290px;
+  background:rgba(19,28,42,.97); border:1px solid var(--gold); border-radius:9px;
+  padding:14px 16px; font-size:12.5px; line-height:1.6; color:var(--paper-dim);
+}
+#tuner.hidden{display:none}
+#tuner .tclock{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:26px; color:var(--gold); font-variant-numeric:tabular-nums}
+#tuner textarea{
+  width:100%; height:150px; margin-top:9px; background:var(--ink); color:var(--paper);
+  border:1px solid var(--rule); border-radius:6px; padding:9px;
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; resize:vertical;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .slide.active .rv{animation:none; opacity:1; transform:none}
+  .slide.active .spark{animation:none; stroke-dashoffset:0}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="stageWrap">
+    <div id="stage">
+
+      <!-- ============ SLIDE 1 — the claim ============ -->
+      <section class="slide" id="s1">
+        <h1 class="display rv" style="--d:.1s">Everything already exists.</h1>
+        <p class="sub rv" style="--d:1.6s">Assessment. Accommodation. Technology. Funding.</p>
+      </section>
+
+      <!-- ============ SLIDE 2 — the inventory ============ -->
+      <section class="slide" id="s2">
+        <p class="eyebrow rv">What a neurodivergent student needs</p>
+        <h2 class="display display--sm rv" style="--d:.1s">It is all already there.</h2>
+        <div class="inventory">
+          <div class="inv-card rv" style="--d:.5s"><div class="tick">&#10003;</div><div class="lbl">Assessment</div><div class="note">Psychoeducational reports</div></div>
+          <div class="inv-card rv" style="--d:1.0s"><div class="tick">&#10003;</div><div class="lbl">Accommodations</div><div class="note">Legally mandated</div></div>
+          <div class="inv-card rv" style="--d:1.5s"><div class="tick">&#10003;</div><div class="lbl">Technology</div><div class="note">Proven assistive tools</div></div>
+          <div class="inv-card rv" style="--d:2.0s"><div class="tick">&#10003;</div><div class="lbl">Funding</div><div class="note">BSWD &middot; CSG&#8209;DSE</div></div>
+        </div>
+      </section>
+
+      <!-- ============ SLIDE 3 — the turn ============ -->
+      <section class="slide" id="s3">
+        <p class="eyebrow rv">What is missing</p>
+        <h2 class="display display--sm rv" style="--d:.1s">No continuous support system.</h2>
+        <div class="inventory" style="grid-template-columns:repeat(5,1fr)">
+          <div class="inv-card dim"><div class="tick">&#10003;</div><div class="lbl">Assessment</div><div class="note">Psychoeducational reports</div></div>
+          <div class="inv-card dim"><div class="tick">&#10003;</div><div class="lbl">Accommodations</div><div class="note">Legally mandated</div></div>
+          <div class="inv-card dim"><div class="tick">&#10003;</div><div class="lbl">Technology</div><div class="note">Proven assistive tools</div></div>
+          <div class="inv-card dim"><div class="tick">&#10003;</div><div class="lbl">Funding</div><div class="note">BSWD &middot; CSG&#8209;DSE</div></div>
+          <div class="gap-card rv" style="--d:1.1s"><div class="lbl">Missing</div><div class="big">High school<br>to career</div></div>
+        </div>
+      </section>
+
+      <!-- ============ SLIDE 4 — the pressure ============ -->
+      <section class="slide" id="s4">
+        <p class="eyebrow rv">Institutional capacity</p>
+        <div class="pressure">
+          <div>
+            <div class="statline rv" style="--d:.15s"><span id="counter">0</span>+<span class="unit"> students</span></div>
+            <div class="statcap rv" style="--d:.6s">carried by a single Ontario accessibility counsellor. HEQCO calls these caseloads &ldquo;extraordinarily high.&rdquo;</div>
+            <div class="arrows">
+              <div class="arrow-item rv up" style="--d:1.5s"><span class="glyph">&#8593;</span> Demand growing</div>
+              <div class="arrow-item rv down" style="--d:2.0s"><span class="glyph">&#8595;</span> Capacity shrinking</div>
+            </div>
+          </div>
+          <div class="chart-frame rv" style="--d:.9s">
+            <div class="chart-title">Ontario post-secondary, indexed</div>
+            <svg viewBox="0 0 400 190" width="100%" height="190" aria-label="Line chart: registrations rising while staffing capacity falls, crossing near the present day.">
+              <line x1="0" y1="189" x2="400" y2="189" stroke="rgba(244,241,234,.14)" stroke-width="1"/>
+              <line x1="0" y1="95" x2="400" y2="95" stroke="rgba(244,241,234,.07)" stroke-width="1"/>
+              <polyline class="spark" style="--d:1.1s" points="6,168 76,150 146,126 216,96 286,58 366,20"
+                fill="none" stroke="#5FC7B8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline class="spark" style="--d:1.35s" points="6,52 76,58 146,68 216,86 286,116 366,158"
+                fill="none" stroke="#E2685C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="chart-key">
+              <span><i style="background:#5FC7B8"></i>Registrations</span>
+              <span><i style="background:#E2685C"></i>Staffing capacity</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SLIDE 5 — the eight barriers ============ -->
+      <section class="slide" id="s5">
+        <p class="eyebrow rv">Grade 11 &rarr; first year &rarr; employment</p>
+        <h2 class="display display--sm rv" style="--d:.1s">Eight barriers.</h2>
+        <div class="gates">
+          <div class="gates-rail"></div>
+          <div class="gates-row" id="gatesRow">
+            <div class="gate rv" style="--d:.55s"><div class="dot">1</div><div class="name">Awareness</div></div>
+            <div class="gate rv" style="--d:.72s"><div class="dot">2</div><div class="name">Affordability</div></div>
+            <div class="gate rv" style="--d:.89s"><div class="dot">3</div><div class="name">Understanding</div></div>
+            <div class="gate rv" style="--d:1.06s"><div class="dot">4</div><div class="name">Registration</div></div>
+            <div class="gate rv" style="--d:1.23s"><div class="dot">5</div><div class="name">Documentation</div></div>
+            <div class="gate rv" style="--d:1.40s"><div class="dot">6</div><div class="name">Funding</div></div>
+            <div class="gate rv" style="--d:1.57s"><div class="dot">7</div><div class="name">Use</div></div>
+            <div class="gate rv" style="--d:1.74s"><div class="dot">8</div><div class="name">Employment</div></div>
+          </div>
+        </div>
+        <p class="gates-caption rv" style="--d:2.3s">A problem at any one can delay or derail the whole process.</p>
+      </section>
+
+      <!-- ============ SLIDE 6 — the team ============ -->
+      <section class="slide" id="s6">
+        <p class="eyebrow rv">The missing support system</p>
+        <h2 class="display display--sm rv" style="--d:.1s">Throughline Learning.</h2>
+        <div class="team">
+          <div class="person rv" style="--d:.7s">
+            <div class="nm">Anna Veronica</div>
+            <div class="rl">Registered Psychotherapist</div>
+            <div class="cr">10+ years as a post-secondary accessibility counsellor. Explains the assessment and helps families get the supports they need.</div>
+          </div>
+          <div class="person rv" style="--d:1.9s">
+            <div class="nm">John</div>
+            <div class="rl">Educational Technologist</div>
+            <div class="cr">Instructional designer with 30 years in post-secondary education. Builds the student&rsquo;s setup and keeps them using it.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SLIDE 7 — proof of life ============ -->
+      <section class="slide" id="s7">
+        <div class="rv"><span class="badge"><span class="pip"></span>Operating today</span></div>
+        <h2 class="display display--sm rv" style="--d:.35s; margin-top:28px">Profitable at eight client hours a week.</h2>
+        <div class="factrow">
+          <div class="fact rv" style="--d:1.1s"><div class="fnum">2</div><div class="flbl">people</div></div>
+          <div class="fact rv" style="--d:1.45s"><div class="fnum">$0</div><div class="flbl">lease</div></div>
+          <div class="fact rv" style="--d:1.8s"><div class="fnum">$21,200</div><div class="flbl">annual fixed overhead</div></div>
+        </div>
+      </section>
+
+      <!-- ============ SLIDE 8 — the ask ============ -->
+      <section class="slide" id="s8">
+        <p class="eyebrow rv">The ask</p>
+        <div class="ask-num rv" style="--d:.15s">$50,000</div>
+        <div class="ask-split">
+          <div class="ask-item rv" style="--d:1.1s">
+            <div class="amt">$20K</div>
+            <div class="what">Resource library. Audio-first, WCAG-compliant modules sold at $350/year.</div>
+          </div>
+          <div class="ask-item rv" style="--d:1.5s">
+            <div class="amt">$30K</div>
+            <div class="what">Institutional database. Verified requirements for every Accessibility Services office in Canada.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SLIDE 9 — close ============ -->
+      <section class="slide" id="s9">
+        <div class="wordmark rv">Throughline Learning</div>
+        <div class="tagline rv" style="--d:.35s">The clearest path to success.</div>
+        <div class="rv" style="--d:.9s"><a class="cta" id="ctaLink" href="#">Read the full venture pitch &rarr;</a></div>
+      </section>
+
+      <!-- ============ Captions ============ -->
+      <div id="captionBar"><div id="captionText"></div></div>
+
+      <!-- ============ Throughline / progress ============ -->
+      <div id="throughline"><div id="throughlineFill"></div></div>
+
+      <!-- ============ Poster ============ -->
+      <div id="poster">
+        <div class="wordmark">Throughline Learning</div>
+        <div class="tagline">The clearest path to success.</div>
+        <button id="playBtn" type="button">&#9654;&nbsp; Play the 60-second pitch</button>
+        <div class="meta" id="posterMeta">narrated &middot; captions included</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="controls">
+    <button id="toggleBtn" type="button">&#9654; Play</button>
+    <button id="restartBtn" type="button">&#8635; Restart</button>
+    <span id="time">0:00 / 1:00</span>
+    <input id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Scrub through the pitch">
+    <span id="slideCount">01 / 09</span>
+    <button id="ccBtn" type="button" aria-pressed="true">CC</button>
+  </div>
+</div>
+
+<div id="notice" class="hidden"></div>
+
+<div id="tuner" class="hidden">
+  <div><b style="color:var(--gold)">TIMING MODE</b></div>
+  <div class="tclock" id="tClock">0.00</div>
+  <div>Play the audio and press <b>M</b> at the exact moment each slide should change. Slide 1 starts at 0.</div>
+  <textarea id="tOut" readonly></textarea>
+  <div style="margin-top:6px">Press <b>R</b> to reset marks. Paste the result into the TIMINGS block.</div>
+</div>
+
+<script>
+/* ==========================================================================
+   1. CONFIG — the two things you will need to change
+   ========================================================================== */
+const CONFIG = {
+  // Your narration file. Put it in the same folder as this index.html.
+  // Until it exists, the deck runs on an internal clock so you can preview.
+  audioSrc: 'pitch.mp3',
+
+  // The live Venture Pitch page.
+  venturePitchUrl: 'https://johnrose-ubc.github.io/throughline_learning_venture_pitch/',
+
+  // Total runtime in seconds. Overridden automatically by the real audio
+  // duration once pitch.mp3 loads.
+  fallbackDuration: 55.6
+};
+
+/* ==========================================================================
+   2. TIMINGS — when each slide appears, in seconds
+   Re-time these against your recording. Open this page with ?tune=1 to get
+   a stopwatch and a tap-to-mark tool that prints this block for you.
+   ========================================================================== */
+const SLIDES = [
+/* MEASURED off pitch.mp3, not estimated. Each slide fires ~0.5s before its
+   narration begins, so the visual is established as you start speaking.
+   Do not hand-edit these unless the audio file changes.                    */
+  { at:  0.05, caption: "Everything a neurodivergent student needs to succeed in college or university already exists." },
+  { at:  6.51, caption: "The assessment. The accommodations. The technology. The funding." },
+  { at: 11.26, caption: "What doesn't exist is a continuous support system from high school through to launching a career." },
+  { at: 17.40, caption: "Demand for accommodation is growing. Institutional capacity is shrinking." },
+  { at: 23.65, caption: "Families have eight barriers to navigate. A problem at any one can derail the whole process." },
+  { at: 30.22, caption: "At Throughline Learning we provide the missing support system through accessibility counselling and educational technology support." },
+  { at: 38.14, caption: "It's running today, and it turns a profit at eight client hours a week." },
+  { at: 43.21, caption: "We're asking for fifty thousand dollars to build the resource library and institutional database that let the business scale." },
+  { at: 50.85, caption: "Throughline Learning. The clearest path to success." }
+];
+
+/* Extra cues that fire inside a slide rather than changing it. */
+const SUBCUES = [
+  { at: 18.4, run: runCounter },       // 0 -> 300 count up, early in slide 4
+  { at: 28.0, run: markBrokenGate }    // a barrier fails, on "delay or derail"
+];
+
+/* ==========================================================================
+   3. ENGINE
+   ========================================================================== */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+const stage      = $('#stage');
+const slideEls   = $$('.slide');
+const poster     = $('#poster');
+const playBtn    = $('#playBtn');
+const toggleBtn  = $('#toggleBtn');
+const restartBtn = $('#restartBtn');
+const ccBtn      = $('#ccBtn');
+const scrub      = $('#scrub');
+const timeEl     = $('#time');
+const countEl    = $('#slideCount');
+const capBar     = $('#captionBar');
+const capText    = $('#captionText');
+const fill       = $('#throughlineFill');
+const notice     = $('#notice');
+
+let duration   = CONFIG.fallbackDuration;
+let current    = -1;
+let started    = false;
+let playing    = false;
+let usingAudio = false;
+let firedSub   = new Set();
+
+/* ---- Audio, with a graceful fallback clock so the deck previews without it */
+const audio = new Audio();
+audio.preload = 'auto';
+audio.src = CONFIG.audioSrc;
+
+audio.addEventListener('loadedmetadata', () => {
+  usingAudio = true;
+  if (isFinite(audio.duration) && audio.duration > 1) duration = audio.duration;
+  const pm = $('#posterMeta');
+  if (pm) pm.innerHTML = fmt(duration) + ' &middot; narrated &middot; captions included';
+  render(0);
+});
+let audioFailed = false;
+audio.addEventListener('error', () => {
+  audioFailed = true; usingAudio = false;
+  diagnoseAudio();
+});
+
+/* Works out WHY the audio failed and says so plainly instead of leaving you
+   to guess. The usual culprit on GitHub Pages is filename case: the server is
+   case-sensitive, macOS is not, so Pitch.MP3 looks fine locally and 404s once
+   published. Second most common is the file never being committed at all. */
+function diagnoseAudio(){
+  const url = new URL(CONFIG.audioSrc, location.href).href;
+  if (location.protocol === 'file:'){
+    showNotice('<b>No audio loaded.</b> Running on a preview clock.<br>Looking for <b>' +
+               CONFIG.audioSrc + '</b> in this same folder.', true);
+    return;
+  }
+  fetch(url, { method:'GET', cache:'no-store' }).then(r => {
+    if (r.status === 404){
+      showNotice('<b>Audio not found &mdash; HTTP 404.</b><br><span class="mono">' + url +
+                 '</span><br><br>Nothing is published at that address. Check the spelling and the ' +
+                 '<b>capitalisation</b> of the filename, and that it sits in the same folder as ' +
+                 'this page. GitHub is case-sensitive; your Mac is not.', true);
+    } else if (!r.ok){
+      showNotice('<b>Audio request failed &mdash; HTTP ' + r.status + '.</b><br><span class="mono">' +
+                 url + '</span>', true);
+    } else {
+      r.blob().then(b => {
+        const kb = Math.round(b.size / 1024);
+        showNotice('<b>File is there (' + kb + ' KB, served as "' + (b.type || 'unknown') +
+          '") but the browser will not play it.</b><br><span class="mono">' + url + '</span><br><br>' +
+          (kb < 5 ? 'That size means the commit stored a Git LFS pointer or a placeholder, not the actual audio.'
+                  : 'The file may be corrupt, or not really an MP3.'), true);
+      });
+    }
+  }).catch(e => {
+    showNotice('<b>Could not reach the audio file.</b><br><span class="mono">' + url +
+               '</span><br>' + e, true);
+  });
+}
+audio.addEventListener('ended', () => finish());
+
+/* Fallback clock */
+let clockStart = 0, clockPaused = 0, finished = false;
+function now(){
+  if (finished)   return duration;          // hold on the last slide, do not wrap
+  if (usingAudio) return audio.currentTime;
+  if (!playing)   return clockPaused;
+  return Math.min(duration, clockPaused + (performance.now() - clockStart) / 1000);
+}
+/* End of deck. Park on slide 9 so the call to action stays clickable. */
+function finish(){
+  finished = true; playing = false; clockPaused = duration;
+  syncToggle(); render(duration);
+}
+function seek(t){
+  t = Math.max(0, Math.min(duration, t));
+  finished = false;
+  if (usingAudio) { audio.currentTime = t; }
+  else { clockPaused = t; clockStart = performance.now(); }
+  firedSub.clear();
+  SUBCUES.forEach((c, i) => { if (c.at <= t) firedSub.add(i); });
+  applySubcueState(t);
+  render(t, true);
+}
+
+/* ---- Stage scaling: fit the 1280x720 coordinate space into the viewport */
+function fitStage(){
+  const wrap = $('#stageWrap');
+  const s = Math.min(wrap.clientWidth / 1280, wrap.clientHeight / 720);
+  stage.style.transform = 'scale(' + s + ')';
+}
+new ResizeObserver(fitStage).observe($('#stageWrap'));
+window.addEventListener('resize', fitStage);
+
+/* ---- Slide switching */
+function slideIndexAt(t){
+  let idx = 0;
+  for (let i = 0; i < SLIDES.length; i++) if (t >= SLIDES[i].at) idx = i;
+  return idx;
+}
+
+function setSlide(i, elapsedInSlide){
+  if (i === current) return;
+  current = i;
+  slideEls.forEach((el, n) => {
+    el.classList.toggle('active', n === i);
+    // If we landed mid-slide (scrub), skip the entrance animations.
+    el.classList.toggle('no-anim', n === i && elapsedInSlide > 0.6);
+  });
+  capText.textContent = SLIDES[i].caption;
+  countEl.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(SLIDES.length).padStart(2, '0');
+}
+
+/* ---- Sub-cues */
+function markBrokenGate(){
+  const gates = $$('#gatesRow .gate');
+  if (!gates.length) return;
+  gates[2].classList.add('broken');
+  for (let i = 3; i < gates.length; i++) gates[i].classList.add('downstream');
+}
+function clearGates(){
+  $$('#gatesRow .gate').forEach(g => g.classList.remove('broken','downstream'));
+}
+let counterRAF = null;
+function runCounter(){
+  const el = $('#counter');
+  if (!el) return;
+  cancelAnimationFrame(counterRAF);
+  const t0 = performance.now(), dur = 1200;
+  (function step(now){
+    const p = Math.min(1, (now - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(300 * eased);
+    if (p < 1) counterRAF = requestAnimationFrame(step);
+  })(performance.now());
+}
+function applySubcueState(t){
+  // Make scrubbing land in a sensible visual state.
+  if (t >= SUBCUES[1].at) markBrokenGate(); else clearGates();
+  const c = $('#counter');
+  if (c) c.textContent = t >= SUBCUES[0].at ? '300' : '0';
+}
+
+/* ---- Frame loop */
+function render(t, force){
+  const i = slideIndexAt(t);
+  setSlide(i, t - SLIDES[i].at);
+  const p = duration ? Math.min(1, t / duration) : 0;
+  fill.style.width = (p * 100) + '%';
+  if (!scrubbing) scrub.value = Math.round(p * 1000);
+  timeEl.textContent = fmt(t) + ' / ' + fmt(duration);
+  if (tuning) $('#tClock').textContent = t.toFixed(2);
+}
+function fmt(s){
+  s = Math.max(0, Math.floor(s));
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+function loop(){
+  const t = now();
+  SUBCUES.forEach((c, i) => {
+    if (!firedSub.has(i) && t >= c.at) { firedSub.add(i); c.run(); }
+  });
+  render(t);
+  if (playing && !finished && t >= duration - 0.05) finish();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---- Transport */
+function play(){
+  if (!started){ started = true; poster.classList.add('hidden'); }
+  if (finished){ restart(); return; }      // pressing play at the end starts over
+  const resumeAt = now();
+  playing = true;
+  clockPaused = resumeAt;
+  clockStart  = performance.now();          // fallback clock always armed
+  if (!audioFailed){
+    // Attempt real audio. If it resolves, now() switches to audio.currentTime.
+    if (!usingAudio){ try { audio.currentTime = resumeAt; } catch(e){} }
+    audio.play().then(() => { usingAudio = true; })
+                .catch(() => { audioFailed = true; usingAudio = false; });
+  }
+  syncToggle();
+}
+function pause(){
+  const at = now();
+  if (usingAudio) audio.pause();
+  clockPaused = at;
+  playing = false;
+  syncToggle();
+}
+function syncToggle(){
+  toggleBtn.innerHTML = finished ? '&#8635; Replay'
+                      : playing  ? '&#10073;&#10073; Pause'
+                                 : '&#9654; Play';
+}
+function restart(){
+  finished = false;
+  clearGates();
+  const c = $('#counter'); if (c) c.textContent = '0';
+  firedSub.clear();
+  current = -1;
+  seek(0);
+  play();
+}
+
+playBtn.addEventListener('click', play);
+restartBtn.addEventListener('click', restart);
+toggleBtn.addEventListener('click', () => playing ? pause() : play());
+ccBtn.addEventListener('click', () => {
+  const off = capBar.classList.toggle('off');
+  ccBtn.setAttribute('aria-pressed', String(!off));
+});
+
+let scrubbing = false;
+scrub.addEventListener('input', () => {
+  scrubbing = true;
+  if (!started){ started = true; poster.classList.add('hidden'); }
+  seek((scrub.value / 1000) * duration);
+});
+scrub.addEventListener('change', () => { scrubbing = false; });
+
+/* ---- Keyboard */
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  const k = e.key.toLowerCase();
+  if (e.code === 'Space'){ e.preventDefault(); playing ? pause() : play(); }
+  else if (e.key === 'ArrowRight'){ e.preventDefault(); jump(1); }
+  else if (e.key === 'ArrowLeft'){ e.preventDefault(); jump(-1); }
+  else if (k === 'c'){ ccBtn.click(); }
+  else if (k === 'm' && tuning){ mark(); }
+  else if (k === 'r' && tuning){ marks = []; renderMarks(); }
+});
+function jump(dir){
+  if (!started){ started = true; poster.classList.add('hidden'); }
+  const i = Math.max(0, Math.min(SLIDES.length - 1, slideIndexAt(now()) + dir));
+  seek(SLIDES[i].at + 0.01);
+}
+
+/* ---- CTA placeholder handling */
+(function(){
+  const a = $('#ctaLink');
+  if (CONFIG.venturePitchUrl){
+    a.href = CONFIG.venturePitchUrl;
+  } else {
+    a.href = '#';
+    a.classList.add('is-placeholder');
+    a.textContent = 'Full venture pitch — link coming';
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      showNotice('<b>Placeholder link.</b> Set <b>CONFIG.venturePitchUrl</b> near the top of the script block in index.html.');
+    });
+  }
+})();
+
+/* ---- Notices */
+let noticeTimer = null;
+function showNotice(html, sticky){
+  notice.innerHTML = html;
+  notice.classList.remove('hidden');
+  clearTimeout(noticeTimer);
+  if (!sticky) noticeTimer = setTimeout(() => notice.classList.add('hidden'), 9000);
+}
+
+/* ==========================================================================
+   4. TIMING MODE  —  open index.html?tune=1
+   ========================================================================== */
+const tuning = new URLSearchParams(location.search).has('tune');
+let marks = [];
+if (tuning) $('#tuner').classList.remove('hidden');
+function mark(){
+  marks.push(now());
+  renderMarks();
+}
+function renderMarks(){
+  const all = [0].concat(marks).slice(0, SLIDES.length);
+  const lines = all.map((t, i) => {
+    const cap = SLIDES[i] ? SLIDES[i].caption.slice(0, 46) + '…' : '';
+    return '  { at: ' + t.toFixed(1).padStart(4) + ', caption: "' + cap + '" },';
+  });
+  $('#tOut').value = 'const SLIDES = [\n' + lines.join('\n') + '\n];';
+}
+if (tuning) renderMarks();
+
+fitStage();
+render(0);
+</script>
+</body>
+</html>
